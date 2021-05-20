@@ -22,7 +22,7 @@ func TestLogin(t *testing.T) {
 	//}
 
 	task := module.SiteTask{
-		Host: "http://192.168.81.130/wordpress",
+		Host: "http://1sad12392.168.81.130/wordpress",
 		User: "admin",
 		Pass: "caonima123",
 	}

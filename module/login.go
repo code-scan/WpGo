@@ -54,13 +54,15 @@ func (w *WpGo) Login(siteTask SiteTask) {
 	if Proxy != "" {
 		w.http.SetProxy(Proxy)
 	}
-	w.http.Execute()
-	w.http.Text()
-	//cookie := w.http.RespCookie()
+	if r := w.http.Execute(); r == nil {
+		return
+	}
+	defer w.http.Close()
+	cookie := w.http.RespCookie()
 	//log.Println(cookie)
 	//log.Println(w.http.StatusCode())
 	//log.Println(w.http.HttpResponse.Header)
-	location := w.http.HttpResponse.Header.Get("location")
+	location := w.http.GetRespHead("location")
 	//log.Println(location)
 	//log.Println(r)
 	if strings.Contains(cookie, "wordpress_logged_in") && w.http.StatusCode() == 302 && strings.Contains(location, "wp-admin") {
@@ -110,8 +112,8 @@ func (w *WpGo) CheckIsBlack(siteTask SiteTask) bool {
 		w.http.SetProxy(Proxy)
 	}
 	w.http.Execute()
+	defer w.http.Close()
 	cookie := w.http.RespCookie()
-	w.http.Byte()
 	if strings.Contains(cookie, "wordpress_test_cookie") == false {
 		w.SetBlack(siteTask.Host, true)
 		return true
@@ -127,17 +129,17 @@ func (w *WpGo) GetUser(host string, id int) string {
 	w.http.HttpClient.CheckRedirect = func(req *http.Request, via []*http.Request) error {
 		return http.ErrUseLastResponse
 	}
+	defer w.http.Close()
 	if r := w.http.Execute(); r == nil {
 		return ""
 	}
+
 	if w.http.StatusCode() != 301 && w.http.StatusCode() != 302 && w.http.StatusCode() != 200 {
-		w.http.HttpResponse.Body.Close()
 		return ""
 	}
-	location := w.http.HttpResponse.Header.Get("location")
+	location := w.http.GetRespHead("location")
 	//通过301获取用户名
 	if location != "" {
-		w.http.HttpResponse.Body.Close()
 		return w.getUser(location)
 	}
 	//通过页面返回获取用户名
