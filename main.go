@@ -24,6 +24,7 @@ func main() {
 	flag.StringVar(&passFile, "p", "", "password list filepath")
 	flag.IntVar(&autoCount, "c", 5, "max auto get user count")
 	flag.IntVar(&threadCount, "t", 20, "max thread")
+	flag.StringVar(&module.Proxy, "x", "", "proxy, socks5://user:pass@host:port, http://host:port")
 	flag.StringVar(&outFile, "o", "result.txt", "out filepath")
 	flag.Parse()
 	log.SetFlags(log.Lshortfile | log.LstdFlags)
