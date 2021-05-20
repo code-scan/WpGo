@@ -49,3 +49,12 @@
 [!] Successful http://192.168.81.130/wordpress - U: admin - P: caonima123
 [!] Successful http://192.168.81.130/wordpress - U: test - P: abc123
 [!] Successful http://192.168.81.130/wordpress - U: go - P: woaini521
+[!] Successful http://192.168.81.130/wordpress - U: admin - P: caonima123
+[!] Successful http://192.168.81.130/wordpress - U: test - P: abc123
+[!] Successful http://192.168.81.130/wordpress - U: go - P: woaini521
+[!] Successful http://192.168.81.130/wordpress - U: admin - P: caonima123
+[!] Successful http://192.168.81.130/wordpress - U: test - P: abc123
+[!] Successful http://192.168.81.130/wordpress - U: go - P: woaini521
+[!] Successful http://192.168.81.130/wordpress - U: admin - P: caonima123
+[!] Successful http://192.168.81.130/wordpress - U: test - P: abc123
+[!] Successful http://192.168.81.130/wordpress - U: go - P: woaini521

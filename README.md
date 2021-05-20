@@ -1,7 +1,7 @@
-# WpGo
 
 ![11](image/demo.jpg)
-# Wordpress Batch Brute Force by Go
+# WpGo
+## Wordpress Batch Brute Force by Go
 
 ```
 Usage of wpgo:

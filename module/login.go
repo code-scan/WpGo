@@ -119,10 +119,12 @@ func (w *WpGo) GetUser(host string, id int) string {
 	w.http.HttpClient.CheckRedirect = func(req *http.Request, via []*http.Request) error {
 		return http.ErrUseLastResponse
 	}
-	w.http.Execute()
-	//if w.http.StatusCode() != 301 && w.http.StatusCode() != 302 {
-	//	return ""
-	//}
+	if r := w.http.Execute(); r == nil {
+		return ""
+	}
+	if w.http.StatusCode() != 301 && w.http.StatusCode() != 302 && w.http.StatusCode() != 200 {
+		return ""
+	}
 	location := w.http.HttpResponse.Header.Get("location")
 	//var userText string
 	//log.Println(location)
