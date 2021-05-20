@@ -14,6 +14,7 @@ var autoCount, threadCount int
 func main() {
 
 	flag.StringVar(&hostFile, "w", "", "website list filepath")
+	flag.StringVar(&userFile, "u", "", "username list filepath")
 	flag.StringVar(&passFile, "p", "", "password list filepath")
 	flag.IntVar(&autoCount, "c", 5, "max auto get user count")
 	flag.IntVar(&threadCount, "t", 20, "max thread")
@@ -24,12 +25,14 @@ func main() {
 		log.Println("website/password file is null")
 		log.Println("usage:")
 		log.Println(os.Args[0], " -h")
-
 		return
 	}
 	var passlist []string
 	var hostlist []string
-
+	var userlist []string
+	if userFile != "" {
+		module.ReadListToArray(userFile, &userlist)
+	}
 	module.ReadListToArray(passFile, &passlist)
 	module.ReadListToArray(hostFile, &hostlist)
 	module.LogFile = outFile
@@ -52,7 +55,7 @@ func main() {
 	}
 	for i := 0; i < threadCount; i++ {
 		module.Wg.Add(2)
-		go module.NewSend(passlist, autoCount)
+		go module.NewSend(passlist, userlist, autoCount)
 		go module.NewWork()
 	}
 	module.Wg.Wait()

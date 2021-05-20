@@ -42,11 +42,14 @@ func NewWork() {
 		}
 	}
 }
-func NewSend(passlist []string, max int) {
+func NewSend(passlist []string, userlist []string, max int) {
 	for {
 		select {
 		case t := <-SiteQueue:
 			user := BatchGetUser(t, max)
+			if len(userlist) > 0 {
+				user = append(user, userlist...)
+			}
 			for _, u := range user {
 				for _, p := range passlist {
 					tt := SiteTask{
@@ -54,7 +57,6 @@ func NewSend(passlist []string, max int) {
 						User: u,
 						Pass: p,
 					}
-					//log.Println("Add Task ", tt)
 					TaskQueue <- tt
 				}
 			}
