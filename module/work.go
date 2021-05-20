@@ -34,6 +34,7 @@ func NewWork() {
 		w := NewWpGo()
 		select {
 		case t := <-TaskQueue:
+			//log.Println("Get Task ", t)
 			w.Login(t)
 		case <-time.After(30 * time.Second):
 			Wg.Done()
@@ -53,6 +54,7 @@ func NewSend(passlist []string, max int) {
 						User: u,
 						Pass: p,
 					}
+					//log.Println("Add Task ", tt)
 					TaskQueue <- tt
 				}
 			}
