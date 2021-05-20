@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"github.com/code-scan/WpGo/module"
 	"log"
 	"os"
@@ -11,8 +12,13 @@ var hostFile, userFile, passFile, outFile string
 var autoUser bool
 var autoCount, threadCount int
 
+func banner() {
+	fmt.Println(" _       __      ______    \n| |     / /___  / ____/___ \n| | /| / / __ \\/ / __/ __ \\\n| |/ |/ / /_/ / /_/ / /_/ /\n|__/|__/ .___/\\____/\\____/ \n      /_/                  ")
+	fmt.Println("Batch Burte Force WordPress")
+	fmt.Println("@Cond0r http://aq.mk\n\n")
+}
 func main() {
-
+	banner()
 	flag.StringVar(&hostFile, "w", "", "website list filepath")
 	flag.StringVar(&userFile, "u", "", "username list filepath")
 	flag.StringVar(&passFile, "p", "", "password list filepath")
