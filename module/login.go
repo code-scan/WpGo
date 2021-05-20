@@ -114,24 +114,37 @@ func (w *WpGo) CheckIsBlack(siteTask SiteTask) bool {
 }
 func (w *WpGo) GetUser(host string, id int) string {
 	uri := fmt.Sprintf("%s/?author=%d", host, id)
-	w.http.New("HEAD", uri)
+	w.http.New("GET", uri)
 	w.http.IgnoreSSL()
 	w.http.HttpClient.CheckRedirect = func(req *http.Request, via []*http.Request) error {
 		return http.ErrUseLastResponse
 	}
 	w.http.Execute()
-	if w.http.StatusCode() != 301 && w.http.StatusCode() != 302 {
-		return ""
-	}
+	//if w.http.StatusCode() != 301 && w.http.StatusCode() != 302 {
+	//	return ""
+	//}
 	location := w.http.HttpResponse.Header.Get("location")
-	log.Println(location)
+	//var userText string
+	//log.Println(location)
+	//通过301获取用户名
 	if location != "" {
-		if user := strings.Split(location, "author/"); len(user) == 2 {
-			if username := strings.Split(user[1], "/"); len(username) > 1 {
-				return username[0]
-			}
-			return user[1]
+		return w.getUser(location)
+	}
+	//通过页面返回获取用户名
+	if text, err := w.http.Text(); err == nil {
+		return w.getUser(text)
+	}
+
+	return ""
+}
+func (w *WpGo) getUser(userText string) string {
+	if user := strings.Split(userText, "author/"); len(user) == 2 {
+		if username := strings.Split(user[1], "/"); len(username) > 1 {
+			//log.Println(username[0])
+			return username[0]
 		}
+		//log.Println(user[1])
+		return user[1]
 	}
 	return ""
 }
