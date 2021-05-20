@@ -1,0 +1,10 @@
+[!] Successful http://192.168.81.130/wordpress - U: admin - P: zz123123
+111
+[!] Successful http://192.168.81.130/wordpress - U: admin - P: zz123123
+[!] Successful http://192.168.81.130/wordpress - U: admin - P: zz123123
+[!] Successful http://192.168.81.130/wordpress - U: admin - P: zz123123
+[!] Successful http://192.168.81.130/wordpress - U: admin - P: zz123123
+[!] Successful http://192.168.81.130/wordpress - U: admin - P: zz123123
+[!] Successful http://192.168.81.130/wordpress - U: admin - P: zz123123
+[!] Successful http://192.168.81.130/wordpress - U: admin - P: zz123123
+[!] Successful http://192.168.81.130/wordpress - U: admin - P: zz123123
