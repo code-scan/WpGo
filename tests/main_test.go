@@ -15,8 +15,14 @@ func TestLogin(t *testing.T) {
 	//	Pass: "password1",
 	//}
 
+	//task := module.SiteTask{
+	//	Host: "https://saiyo-ac.jp",
+	//	User: "master",
+	//	Pass: "homelesspa",
+	//}
+
 	task := module.SiteTask{
-		Host: "https://167.172.19.58/wp-login.php",
+		Host: "http://192.168.81.130/wordpress",
 		User: "admin",
 		Pass: "caonima123",
 	}

