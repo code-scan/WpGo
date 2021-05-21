@@ -33,7 +33,7 @@ func Write(line string) {
 }
 func NewWpGo() *WpGo {
 	w := WpGo{}
-	w.http = Ghttp.Http{}
+	w.http = *Ghttp.New()
 	return &w
 }
 func (w *WpGo) Login(siteTask SiteTask) {
@@ -75,7 +75,10 @@ func (w *WpGo) Login(siteTask SiteTask) {
 
 }
 func (w *WpGo) GetSuccess(key string) bool {
-	return Success[key]
+	sLock.Lock()
+	r := Success[key]
+	sLock.Unlock()
+	return r
 }
 func (w *WpGo) SetSuccess(key string) {
 	sLock.Lock()
@@ -84,7 +87,10 @@ func (w *WpGo) SetSuccess(key string) {
 	return
 }
 func (w *WpGo) GetBlack(key string) bool {
-	return BlackList[key]
+	sLock.Lock()
+	r := BlackList[key]
+	sLock.Unlock()
+	return r
 }
 func (w *WpGo) SetBlack(key string, t bool) {
 	sLock.Lock()

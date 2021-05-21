@@ -28,6 +28,9 @@ func main() {
 	flag.StringVar(&outFile, "o", "result.txt", "out filepath")
 	flag.Parse()
 	log.SetFlags(log.Lshortfile | log.LstdFlags)
+	//hostFile = "dict/site.txt"
+	//passFile = "dict/p.txt"
+	//threadCount = 2000
 	if hostFile == "" || passFile == "" {
 		log.Println("website/password file is null")
 		log.Println("usage:")
