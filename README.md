@@ -28,6 +28,9 @@ auto get author and try login
 ```
 go run main.go -p pass.txt -w site.txt
 WpGo.exe -p pass.txt -w site.txt
+
+WpGo.exe -a xmlrpc -p ./dict/p.txt -u ./dict/u.txt -w ./dict/site.txt
+
 ```
 
 auto get author and custom author list
