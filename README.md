@@ -5,6 +5,8 @@
 
 ```
 Usage of wpgo:
+  -a string
+        attack type  login / xmprpc (default "login")
   -c int
     	max auto get user count (default 5)
   -o string

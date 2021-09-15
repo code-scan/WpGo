@@ -29,9 +29,9 @@ func ReadListToArray(f string, a *[]string) {
 	}
 }
 
-func NewWork() {
+func NewWork(attackType string) {
 	for {
-		w := NewWpGo()
+		w := NewWpGo(attackType)
 		select {
 		case t := <-TaskQueue:
 			//log.Println("Get Task ", t)

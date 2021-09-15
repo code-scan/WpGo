@@ -3,14 +3,17 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/code-scan/WpGo/module"
 	"log"
 	"os"
+	"runtime/pprof"
+
+	"github.com/code-scan/WpGo/module"
 )
 
 var hostFile, userFile, passFile, outFile string
 var autoUser bool
 var autoCount, threadCount int
+var AttackType string
 
 func banner() {
 	fmt.Println(" _       __      ______    \n| |     / /___  / ____/___ \n| | /| / / __ \\/ / __/ __ \\\n| |/ |/ / /_/ / /_/ / /_/ /\n|__/|__/ .___/\\____/\\____/ \n      /_/                  ")
@@ -26,6 +29,7 @@ func main() {
 	flag.IntVar(&threadCount, "t", 20, "max thread")
 	flag.StringVar(&module.Proxy, "x", "", "proxy, socks5://user:pass@host:port, http://host:port")
 	flag.StringVar(&outFile, "o", "result.txt", "out filepath")
+	flag.StringVar(&AttackType, "a", "login", "attack type  login / xmprpc")
 	flag.Parse()
 	log.SetFlags(log.Lshortfile | log.LstdFlags)
 	//hostFile = "dict/site.txt"
@@ -60,13 +64,16 @@ func main() {
 	//增加任务到队列
 	module.SiteQueue = make(chan string, len(hostlist))
 	module.TaskQueue = make(chan module.SiteTask, threadCount*30)
+
+	defer pprof.StopCPUProfile()
+
 	for _, site := range hostlist {
 		module.SiteQueue <- site
 	}
 	for i := 0; i < threadCount; i++ {
 		module.Wg.Add(2)
 		go module.NewSend(passlist, userlist, autoCount)
-		go module.NewWork()
+		go module.NewWork(AttackType)
 	}
 	module.Wg.Wait()
 }
