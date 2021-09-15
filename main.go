@@ -29,7 +29,7 @@ func main() {
 	flag.IntVar(&threadCount, "t", 20, "max thread")
 	flag.StringVar(&module.Proxy, "x", "", "proxy, socks5://user:pass@host:port, http://host:port")
 	flag.StringVar(&outFile, "o", "result.txt", "out filepath")
-	flag.StringVar(&AttackType, "a", "login", "attack type  login / xmprpc")
+	flag.StringVar(&AttackType, "a", "login", "attack type  login / xmlrpc")
 	flag.Parse()
 	log.SetFlags(log.Lshortfile | log.LstdFlags)
 	//hostFile = "dict/site.txt"
