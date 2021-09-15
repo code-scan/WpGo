@@ -50,6 +50,7 @@ func main() {
 	module.ReadListToArray(passFile, &passlist)
 	module.ReadListToArray(hostFile, &hostlist)
 	module.LogFile = outFile
+	log.Println("[*] Attack Type      : ", AttackType)
 	log.Println("[*] WebSite Path     : ", hostFile)
 	log.Println("[*] WebSite Count    : ", len(hostlist))
 
@@ -60,6 +61,8 @@ func main() {
 	log.Println("[*] Max Thread Count : ", threadCount)
 
 	log.Println("[*] Output Path      : ", outFile)
+
+	log.Println("[*] Total Task       : ", len(hostlist)*len(passlist)*len(userlist))
 
 	//增加任务到队列
 	module.SiteQueue = make(chan string, len(hostlist))
