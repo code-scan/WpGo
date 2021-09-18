@@ -33,3 +33,4 @@
 [!] Successful https://34.204.227.158 - U: subscriber - P: subscriber
 [!] Successful http://35.239.217.210 - U: james - P: password
 [!] Successful http://35.239.217.210:80 - U: james - P: password
+[!] Successful https://fritschi.swiss - U: test - P: test

