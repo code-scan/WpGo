@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"runtime/pprof"
+	"strings"
 
 	"github.com/code-scan/WpGo/module"
 )
@@ -29,21 +30,21 @@ func main() {
 	flag.IntVar(&threadCount, "t", 20, "max thread")
 	flag.StringVar(&module.Proxy, "x", "", "proxy, socks5://user:pass@host:port, http://host:port")
 	flag.StringVar(&outFile, "o", "result.txt", "out filepath")
-	flag.StringVar(&AttackType, "a", "login", "attack type  login / xmlrpc")
+	flag.StringVar(&AttackType, "a", "login", "attack type  login / xmlrpc / ddos")
 	flag.Parse()
 	log.SetFlags(log.Lshortfile | log.LstdFlags)
 	//hostFile = "dict/site.txt"
 	//passFile = "dict/p.txt"
 	//threadCount = 2000
-	if hostFile == "" || passFile == "" {
+	if (hostFile == "" || passFile == "") && AttackType != "ddos" {
 		log.Println("website/password file is null")
 		log.Println("usage:")
 		log.Println(os.Args[0], " -h")
 		return
 	}
-	var passlist []string
-	var hostlist []string
-	var userlist []string
+	var passlist []string = []string{}
+	var hostlist []string = []string{}
+	var userlist []string = []string{}
 	if userFile != "" {
 		module.ReadListToArray(userFile, &userlist)
 	}
@@ -71,6 +72,9 @@ func main() {
 	defer pprof.StopCPUProfile()
 
 	for _, site := range hostlist {
+		if strings.Contains(site, "http://") == false && strings.Contains(site, "https://") == false {
+			site = fmt.Sprintf("http://%s", site)
+		}
 		module.SiteQueue <- site
 	}
 	for i := 0; i < threadCount; i++ {

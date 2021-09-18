@@ -1,1 +1,9 @@
 [!] Successful https://107.22.38.159 - U: bigmakerslab - P: 123456789
+[!] Successful https://107.22.38.159 - U: bigmakerslab - P: 123456789
+[!] Successful https://107.22.38.159 - U: bigmakerslab - P: 123456789
+[!] Successful https://107.22.38.159 - U: bigmakerslab - P: 123456789
+[!] Successful http://116.80.17.159 - U: test - P: test
+[!] Successful http://3.brandaidevents.com - U: admin - P: admin
+[!] Successful http://35.239.217.210 - U: james - P: password
+[!] Successful http://35.239.217.210:80 - U: james - P: password
+[!] Successful http://66.96.230.98:82 - U: admin - P: admin
