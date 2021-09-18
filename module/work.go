@@ -56,7 +56,7 @@ func NewWork(attackType string) {
 		select {
 		case t := <-TaskQueue:
 			//log.Println("Get Task ", t)
-			w.Attack(t)
+			w.Login(t)
 		case <-time.After(30 * time.Second):
 			Wg.Done()
 			return

