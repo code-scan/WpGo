@@ -20,6 +20,7 @@ var Proxy string
 type WpGo struct {
 	http       Ghttp.Http
 	AttackType string
+	siteTasks  []SiteTask
 }
 
 func NewWpGo(attackType string) *WpGo {
@@ -34,10 +35,20 @@ func (w *WpGo) Login(site SiteTask) {
 		w.FormLogin(site)
 	case "xmlrpc":
 		w.XMLRCPLogin(site)
+	case "multi":
+		if len(w.siteTasks) >= 10 {
+			w.MulitLogin()
+			break
+		}
+		w.siteTasks = append(w.siteTasks, site)
 	default:
 		break
 	}
 
+}
+func (w *WpGo) MulitLogin() {
+
+	w.siteTasks = []SiteTask{}
 }
 func (w *WpGo) XMLRCPLogin(siteTask SiteTask) {
 	if w.CheckIsBlack(siteTask) {
@@ -62,7 +73,7 @@ func (w *WpGo) XMLRCPLogin(siteTask SiteTask) {
 		w.AddFail(siteTask.Host)
 		return
 	}
-	if w.http.StatusCode != 200 {
+	if w.http.StatusCode() != 200 {
 		w.AddFail(siteTask.Host)
 	}
 	ret, _ := w.http.Text()

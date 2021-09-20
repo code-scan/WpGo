@@ -1,6 +1,7 @@
 package module
 
 import (
+	"encoding/xml"
 	"log"
 	"os"
 )
@@ -21,4 +22,39 @@ func Write(line string) {
 		file.WriteString(line)
 	}
 	lock.Unlock()
+}
+
+type MethodResponse struct {
+	XMLName xml.Name `xml:"methodResponse"`
+	Text    string   `xml:",chardata"`
+	Params  struct {
+		Text  string `xml:",chardata"`
+		Param struct {
+			Text  string `xml:",chardata"`
+			Value struct {
+				Text  string `xml:",chardata"`
+				Array struct {
+					Text string `xml:",chardata"`
+					Data struct {
+						Text  string `xml:",chardata"`
+						Value []struct {
+							Text   string `xml:",chardata"`
+							Struct struct {
+								Text   string `xml:",chardata"`
+								Member []struct {
+									Text  string `xml:",chardata"`
+									Name  string `xml:"name"`
+									Value struct {
+										Text   string `xml:",chardata"`
+										Int    string `xml:"int"`
+										String string `xml:"string"`
+									} `xml:"value"`
+								} `xml:"member"`
+							} `xml:"struct"`
+						} `xml:"value"`
+					} `xml:"data"`
+				} `xml:"array"`
+			} `xml:"value"`
+		} `xml:"param"`
+	} `xml:"params"`
 }
