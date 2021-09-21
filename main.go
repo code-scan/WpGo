@@ -8,6 +8,7 @@ import (
 	"runtime/pprof"
 	"strings"
 
+	"github.com/code-scan/WpGo/common"
 	"github.com/code-scan/WpGo/module"
 )
 
@@ -51,6 +52,7 @@ func main() {
 	module.ReadListToArray(passFile, &passlist)
 	module.ReadListToArray(hostFile, &hostlist)
 	module.LogFile = outFile
+	common.InitLog()
 	log.Println("[*] Attack Type      : ", AttackType)
 	log.Println("[*] WebSite Path     : ", hostFile)
 	log.Println("[*] WebSite Count    : ", len(hostlist))
